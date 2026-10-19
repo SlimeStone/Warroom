@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Check, Copy, Download, FileCode2, Layers, Palette, RotateCcw, ShieldCheck } from 'lucide-react';
 import { ArtifactConfig, DEFAULT_ARTIFACT_CONFIG } from '../data/warRoomData.ts';
+import { generateMasterAutopilotPowerShell } from '../data/automationData.ts';
 import {
   generateCircuitBreakerFiles,
   generateContextMd,
@@ -19,7 +20,8 @@ type PreviewArtifactTab =
   | 'copilot_md'
   | 'circuit_breaker'
   | 'demo_vault'
-  | 'readme_md';
+  | 'readme_md'
+  | 'win11_ps1';
 
 const FONT_PAIR_OPTIONS = [
   'Space Grotesk (Headers) + Inter (Body) + JetBrains Mono (Telemetry)',
@@ -41,6 +43,7 @@ export const ArtifactStudio: React.FC<ArtifactStudioProps> = ({
   const copilotMdContent = generateCopilotInstructionsMd(config);
   const circuitFiles = generateCircuitBreakerFiles(config);
   const readmeMdContent = generateJudgeReadmeMd(config);
+  const win11Ps1Content = generateMasterAutopilotPowerShell(config);
 
   const getCurrentArtifactFile = (): { filename: string; content: string } => {
     switch (activeArtifactTab) {
@@ -56,6 +59,8 @@ export const ArtifactStudio: React.FC<ArtifactStudioProps> = ({
         return { filename: 'demo_vault.json', content: circuitFiles.demoVaultJson };
       case 'readme_md':
         return { filename: 'README.md', content: readmeMdContent };
+      case 'win11_ps1':
+        return { filename: 'autopilot_v2_5.ps1', content: win11Ps1Content };
     }
   };
 
@@ -95,25 +100,25 @@ export const ArtifactStudio: React.FC<ArtifactStudioProps> = ({
   return (
     <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 space-y-6">
       {/* Studio Header */}
-      <div className="bg-[#111827] border border-slate-800 rounded-lg p-5 sm:p-6 flex flex-wrap items-start justify-between gap-4">
+      <div className="shader-glass-card rounded-3xl p-5 sm:p-6 flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1 max-w-3xl">
           <div className="text-xs font-mono text-cyan-400">
-            INTERACTIVE ARTIFACT STUDIO · 1-CLICK FILE GENERATORS
+            INTERACTIVE ARTIFACT STUDIO v2.5 · 1-CLICK FILE GENERATORS
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-100 font-display">
-            Golden Demo Script, Canva Brand Kit, CONTEXT.md & 5500ms Circuit-Breaker Builder
+            Golden Demo Script, Canva Brand Kit, CONTEXT.md & Windows 11 .ps1 Builder
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Configure your 4-Screen Golden Demo, Canva hex tokens, database schema, and 3-Tier
-            Hybrid AI DAG below. Immediately copy or download ready-to-commit files for your
-            repository.
+            Configure your 4-Screen Golden Demo, Canva hex tokens, database schema, and hybrid AI
+            pipeline below. Immediately copy or download ready-to-commit files (including{' '}
+            <code className="text-cyan-300">autopilot_v2_5.ps1</code>) for your repository.
           </p>
         </div>
 
         <button
           type="button"
           onClick={onResetConfig}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-[#090D16] hover:bg-slate-800 border border-slate-800 rounded-md transition-colors cursor-pointer shrink-0"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-slate-300 bg-[#090D16] hover:bg-slate-800 border border-slate-800 rounded-xl transition-colors cursor-pointer shrink-0"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>Restore Default Blueprint</span>
@@ -453,14 +458,14 @@ export const ArtifactStudio: React.FC<ArtifactStudioProps> = ({
         </div>
 
         {/* Right Column: Live Generated Artifact Preview & Download (7 cols) */}
-        <div className="lg:col-span-7 bg-[#111827] border border-slate-800 rounded-lg p-5 sm:p-6 space-y-4 sticky top-36">
+        <div className="lg:col-span-7 shader-glass-card rounded-3xl p-5 sm:p-6 space-y-4 sticky top-36">
           {/* Artifact File Selector Tabs */}
           <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 type="button"
                 onClick={() => setActiveArtifactTab('context_md')}
-                className={`px-3 py-1.5 text-xs font-mono font-medium rounded transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`px-3 py-1.5 text-xs font-mono font-medium rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                   activeArtifactTab === 'context_md'
                     ? 'bg-cyan-400 text-slate-950 font-semibold'
                     : 'bg-[#090D16] text-slate-300 hover:text-slate-100 border border-slate-800'
@@ -471,7 +476,7 @@ export const ArtifactStudio: React.FC<ArtifactStudioProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveArtifactTab('copilot_md')}
-                className={`px-3 py-1.5 text-xs font-mono font-medium rounded transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`px-3 py-1.5 text-xs font-mono font-medium rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                   activeArtifactTab === 'copilot_md'
                     ? 'bg-cyan-400 text-slate-950 font-semibold'
                     : 'bg-[#090D16] text-slate-300 hover:text-slate-100 border border-slate-800'
@@ -482,18 +487,18 @@ export const ArtifactStudio: React.FC<ArtifactStudioProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveArtifactTab('circuit_breaker')}
-                className={`px-3 py-1.5 text-xs font-mono font-medium rounded transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`px-3 py-1.5 text-xs font-mono font-medium rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                   activeArtifactTab === 'circuit_breaker'
                     ? 'bg-cyan-400 text-slate-950 font-semibold'
                     : 'bg-[#090D16] text-slate-300 hover:text-slate-100 border border-slate-800'
                 }`}
               >
-                5500ms Circuit-Breaker
+                Offline Safety Net
               </button>
               <button
                 type="button"
                 onClick={() => setActiveArtifactTab('demo_vault')}
-                className={`px-3 py-1.5 text-xs font-mono font-medium rounded transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`px-3 py-1.5 text-xs font-mono font-medium rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                   activeArtifactTab === 'demo_vault'
                     ? 'bg-cyan-400 text-slate-950 font-semibold'
                     : 'bg-[#090D16] text-slate-300 hover:text-slate-100 border border-slate-800'
@@ -504,13 +509,24 @@ export const ArtifactStudio: React.FC<ArtifactStudioProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveArtifactTab('readme_md')}
-                className={`px-3 py-1.5 text-xs font-mono font-medium rounded transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`px-3 py-1.5 text-xs font-mono font-medium rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                   activeArtifactTab === 'readme_md'
                     ? 'bg-cyan-400 text-slate-950 font-semibold'
                     : 'bg-[#090D16] text-slate-300 hover:text-slate-100 border border-slate-800'
                 }`}
               >
                 Judge README.md
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveArtifactTab('win11_ps1')}
+                className={`px-3 py-1.5 text-xs font-mono font-medium rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                  activeArtifactTab === 'win11_ps1'
+                    ? 'bg-indigo-400 text-slate-950 font-semibold'
+                    : 'bg-[#090D16] text-indigo-300 hover:text-indigo-100 border border-indigo-500/40'
+                }`}
+              >
+                Win11 PowerShell (.ps1)
               </button>
             </div>
 

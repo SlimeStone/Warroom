@@ -19,6 +19,8 @@ import {
   AutomationProgressSummary,
   AutomationStage,
   generateMasterAutopilotBash,
+  generateMasterAutopilotPowerShell,
+  generateStagePowerShellScript,
   injectAutomationVariables,
 } from '../data/automationData.ts';
 
@@ -54,8 +56,10 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
   onNavigateToWarRoom,
 }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [shellMode, setShellMode] = useState<'powershell' | 'bash'>('powershell');
   const [simLogs, setSimLogs] = useState<string[]>([
-    '[AUTOPILOT READY] 8-Stage CLI & Multi-Agent Automation Harness initialized.',
+    '[AUTOPILOT v2.5 READY] 8-Stage CLI & Multi-Agent Automation Harness initialized.',
+    '[HARDWARE PROFILE] Windows 11 · AMD Ryzen 9 HX · 16GB RAM · NVIDIA RTX 5060 (8GB VRAM)',
     `[CONTEXT] Project="${artifactConfig.projectName}" | Domain="${artifactConfig.problemDomain}"`,
     '[READY] Click "Run Full 8-Stage Simulation" or "Simulate Stage" to execute the automated pipeline.',
   ]);
@@ -72,7 +76,15 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
   const isAllStageDone =
     selectedStage.tasks.length > 0 && stageDoneCount === selectedStage.tasks.length;
 
-  const renderedScript = injectAutomationVariables(selectedStage.scriptTemplate, artifactConfig);
+  const activeScriptFilename =
+    shellMode === 'powershell'
+      ? `${selectedStage.number}_win11_rtx5060_stage_${selectedStage.number}.ps1`
+      : selectedStage.scriptFilename;
+
+  const renderedScript =
+    shellMode === 'powershell'
+      ? generateStagePowerShellScript(selectedStage, artifactConfig)
+      : injectAutomationVariables(selectedStage.scriptTemplate, artifactConfig);
 
   const runStageSimulation = (stage: AutomationStage) => {
     setIsSimulating(true);
@@ -80,7 +92,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
       injectAutomationVariables(line, artifactConfig)
     );
     setSimLogs([
-      `[EXEC] Running ${stage.scriptFilename} (${stage.title})...`,
+      `[EXEC v2.5] Running ${stage.scriptFilename} (${stage.title}) on Ryzen 9 HX + RTX 5060 8GB...`,
       ...lines,
     ]);
     onMarkStageAutoTasks(stage, true);
@@ -90,7 +102,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
   const runFullPipelineSimulation = () => {
     setIsSimulating(true);
     const allLines: string[] = [
-      `[MASTER AUTOPILOT] Executing full 8-stage automation pipeline for "${artifactConfig.projectName}"...`,
+      `[MASTER AUTOPILOT v2.5] Executing full 8-stage automation pipeline for "${artifactConfig.projectName}"...`,
     ];
     for (const st of AUTOMATION_STAGES) {
       for (const l of st.simulationLogs) {
@@ -137,8 +149,13 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
   };
 
   const handleDownloadMasterBundle = () => {
-    const masterContent = generateMasterAutopilotBash(artifactConfig, AUTOMATION_STAGES);
-    handleDownloadFile('autopilot_master_pipeline.sh', masterContent);
+    if (shellMode === 'powershell') {
+      const psContent = generateMasterAutopilotPowerShell(artifactConfig, AUTOMATION_STAGES);
+      handleDownloadFile('autopilot_master_win11_v2_5.ps1', psContent);
+    } else {
+      const bashContent = generateMasterAutopilotBash(artifactConfig, AUTOMATION_STAGES);
+      handleDownloadFile('autopilot_master_pipeline.sh', bashContent);
+    }
   };
 
   return (
@@ -150,7 +167,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
             <button
               type="button"
               onClick={onNavigateToHome}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-300 bg-[#090D16] hover:bg-slate-800 border border-slate-800 rounded transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-[#090D16] hover:bg-slate-800 border border-slate-800 rounded-xl transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5 text-emerald-400" />
               <span>Home Portal</span>
@@ -158,12 +175,12 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
 
             <div className="text-xs sm:text-sm font-bold text-slate-100 font-display">
               <span className="text-emerald-400 font-mono mr-2">SUB-WEBSITE 02</span>
-              AUTOPILOT v2.0: Step-by-Step Hackathon Automation Plan
+              AUTOPILOT v2.5: Dual PowerShell (.ps1) & Bash (.sh) Automation Plan
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 bg-[#090D16] border border-slate-800 px-3 py-1.5 rounded text-xs font-mono tabular-nums">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex items-center gap-2 bg-[#090D16] border border-slate-800 px-3.5 py-1.5 rounded-xl text-xs font-mono tabular-nums">
               <span className="text-slate-400">Automation Progress:</span>
               <span className="text-emerald-400 font-bold" data-testid="automation-progress-label">
                 {automationProgress.completedStages}/{automationProgress.totalStages} Stages (
@@ -174,7 +191,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
             <button
               type="button"
               onClick={() => onMarkAllAutoStages(automationProgress.percent < 100)}
-              className="px-3 py-1.5 text-xs font-semibold text-emerald-300 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 rounded transition-colors cursor-pointer whitespace-nowrap shrink-0"
+              className="px-3 py-1.5 text-xs font-semibold text-emerald-300 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
               {automationProgress.percent === 100 ? 'Reset All 8 Stages' : 'Verify All 8 Stages'}
             </button>
@@ -182,18 +199,22 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
             <button
               type="button"
               onClick={handleDownloadMasterBundle}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded transition-colors cursor-pointer whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Download autopilot_master.sh</span>
+              <span>
+                {shellMode === 'powershell'
+                  ? 'Download autopilot_win11_v2_5.ps1'
+                  : 'Download autopilot_master.sh'}
+              </span>
             </button>
 
             <button
               type="button"
               onClick={onNavigateToWarRoom}
-              className="px-3 py-1.5 text-xs font-medium text-cyan-300 bg-[#090D16] hover:bg-slate-800 border border-cyan-500/40 rounded transition-colors cursor-pointer whitespace-nowrap shrink-0"
+              className="px-3 py-1.5 text-xs font-medium text-cyan-300 bg-[#090D16] hover:bg-slate-800 border border-cyan-500/40 rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
-              Switch to Sub-Website 1 (War Room) →
+              Switch to Sub-Website 1 (War Room v2.5) →
             </button>
           </div>
         </div>
@@ -201,7 +222,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
 
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Dynamic Variable Injection & Live Pipeline Simulator Console */}
-        <section className="bg-[#111827] border border-slate-800 rounded-lg p-5 sm:p-6 space-y-5">
+        <section className="shader-glass-card rounded-3xl p-5 sm:p-6 space-y-5">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
             <div className="lg:col-span-3">
               <label
@@ -217,7 +238,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                 onChange={(e) =>
                   onUpdateConfig({ ...artifactConfig, projectName: e.target.value })
                 }
-                className="w-full px-3 py-1.5 text-xs sm:text-sm font-mono bg-[#090D16] border border-slate-800 rounded text-slate-100 focus:outline-none focus:border-emerald-400"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm font-mono bg-[#090D16] border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-emerald-400"
               />
             </div>
 
@@ -235,7 +256,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                 onChange={(e) =>
                   onUpdateConfig({ ...artifactConfig, problemDomain: e.target.value })
                 }
-                className="w-full px-3 py-1.5 text-xs sm:text-sm font-mono bg-[#090D16] border border-emerald-500/50 rounded text-emerald-200 focus:outline-none focus:border-emerald-400"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm font-mono bg-[#090D16] border border-emerald-500/50 rounded-xl text-emerald-200 focus:outline-none focus:border-emerald-400"
               />
             </div>
 
@@ -244,7 +265,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                 type="button"
                 onClick={runFullPipelineSimulation}
                 disabled={isSimulating}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded-md transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0"
               >
                 <Play className="w-3.5 h-3.5" />
                 <span>Run Full 8-Stage Simulation</span>
@@ -253,7 +274,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
               <button
                 type="button"
                 onClick={() => runStageSimulation(selectedStage)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-cyan-300 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 rounded-md transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-cyan-300 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0"
               >
                 <Zap className="w-3.5 h-3.5" />
                 <span>Simulate Stage {selectedStage.number}</span>
@@ -267,7 +288,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                   ])
                 }
                 aria-label="Clear Simulator Terminal"
-                className="px-2.5 py-2 text-xs font-medium text-slate-300 bg-[#090D16] hover:bg-slate-800 border border-slate-800 rounded-md transition-colors cursor-pointer"
+                className="px-2.5 py-2 text-xs font-medium text-slate-300 bg-[#090D16] hover:bg-slate-800 border border-slate-800 rounded-xl transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
@@ -275,12 +296,12 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
           </div>
 
           {/* Interactive Dry-Run Terminal Console */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-md p-3.5 space-y-2">
-            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 border-b border-slate-800/80 pb-2">
+          <div className="bg-[#090D16] border border-slate-800 rounded-2xl p-4 space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-400 border-b border-slate-800/80 pb-2">
               <div className="flex items-center gap-2">
                 <Terminal className="w-3.5 h-3.5 text-emerald-400" />
                 <span className="text-slate-200 font-semibold">
-                  AUTOPILOT DRY-RUN PIPELINE SIMULATOR CONSOLE
+                  AUTOPILOT v2.5 DRY-RUN PIPELINE SIMULATOR CONSOLE
                 </span>
               </div>
               <span className="text-emerald-400 tabular-nums">
@@ -302,11 +323,11 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
           {/* Left Column: 8 Sequential Automation Stages */}
           <aside
             aria-label="8-Stage Automation Playbook Navigator"
-            className="lg:col-span-4 bg-[#111827] border border-slate-800 rounded-lg p-4 space-y-2.5"
+            className="lg:col-span-4 shader-glass-card rounded-3xl p-4 sm:p-5 space-y-2.5"
           >
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <h2 className="text-sm font-bold text-slate-100 font-display">
-                8-Stage Automation Sequence
+                8-Stage v2.5 Automation Sequence
               </h2>
               <span className="text-xs font-mono text-emerald-400 tabular-nums">
                 {automationProgress.completedTasks}/{automationProgress.totalTasks} steps
@@ -324,7 +345,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                   key={stage.id}
                   type="button"
                   onClick={() => onSelectStageId(stage.id)}
-                  className={`w-full text-left p-3 rounded-md border transition-colors cursor-pointer ${
+                  className={`w-full text-left p-3.5 rounded-2xl border transition-colors cursor-pointer ${
                     isSelected
                       ? 'bg-slate-800/90 border-emerald-400/70 text-slate-100'
                       : 'bg-[#090D16]/60 border-slate-800/80 text-slate-300 hover:bg-slate-800/40 hover:border-slate-700'
@@ -347,7 +368,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                     </span>
                   </div>
 
-                  <div className="text-xs font-semibold text-slate-100 mt-1 line-clamp-1">
+                  <div className="text-xs sm:text-sm font-semibold text-slate-100 mt-1 line-clamp-1">
                     {stage.title}
                   </div>
 
@@ -365,7 +386,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
 
           {/* Right Main Viewport: Selected Automation Stage Checklist & Copyable Script */}
           <section className="lg:col-span-8 space-y-6">
-            <div className="bg-[#111827] border border-slate-800 rounded-lg p-5 sm:p-6 space-y-5">
+            <div className="shader-glass-card rounded-3xl p-5 sm:p-6 space-y-5">
               {/* Stage Header */}
               <div className="flex flex-wrap items-start justify-between gap-4 pb-4 border-b border-slate-800">
                 <div className="space-y-1 max-w-2xl">
@@ -393,7 +414,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                   <button
                     type="button"
                     onClick={() => runStageSimulation(selectedStage)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded-md transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0"
                   >
                     <Play className="w-3.5 h-3.5" />
                     <span>Simulate Stage {selectedStage.number}</span>
@@ -402,7 +423,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                   <button
                     type="button"
                     onClick={() => onMarkStageAutoTasks(selectedStage, !isAllStageDone)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-200 bg-[#090D16] hover:bg-slate-800 border border-slate-700 rounded-md transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-slate-200 bg-[#090D16] hover:bg-slate-800 border border-slate-700 rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     <span>{isAllStageDone ? 'Uncheck Stage' : 'Mark Stage Verified'}</span>
@@ -411,7 +432,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
               </div>
 
               {/* Orchestrated Agents & Tools */}
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 bg-[#090D16] border border-slate-800 px-3.5 py-2.5 rounded-md">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 bg-[#090D16] border border-slate-800 px-4 py-3 rounded-2xl">
                 <Cpu className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>Automated Agents & Tools Invoked:</span>
                 <span className="font-mono text-indigo-300">
@@ -435,7 +456,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                   return (
                     <div
                       key={task.id}
-                      className={`p-4 rounded-lg border transition-colors ${
+                      className={`p-4 rounded-2xl border transition-colors ${
                         isChecked
                           ? 'bg-[#090D16]/90 border-emerald-500/40'
                           : 'bg-[#090D16] border-slate-800'
@@ -454,7 +475,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                             <label
                               htmlFor={`auto-task-${task.id}`}
                               className={`text-sm font-semibold cursor-pointer ${
-                                isChecked ? 'line-through text-slate-400' : 'text-slate-100'
+                                isChecked ? 'text-emerald-300' : 'text-slate-100'
                               }`}
                             >
                               {task.title}
@@ -468,7 +489,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                             {task.description}
                           </p>
 
-                          <div className="bg-[#111827] border border-slate-800/90 rounded px-3 py-1.5 font-mono text-xs text-cyan-300 overflow-x-auto">
+                          <div className="bg-[#111827] border border-slate-800/90 rounded-xl px-3.5 py-2 font-mono text-xs text-cyan-300 overflow-x-auto">
                             $ {injectAutomationVariables(task.commandPreview, artifactConfig)}
                           </div>
                         </div>
@@ -478,25 +499,51 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                 })}
               </div>
 
-              {/* Copyable & Downloadable Stage Automation Script */}
-              <div className="space-y-2.5 pt-2 border-t border-slate-800">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
+              {/* Copyable & Downloadable Stage Automation Script with v2.5 Shell Switcher */}
+              <div className="space-y-3 pt-3 border-t border-slate-800">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-300">
                     <Sparkles className="w-4 h-4 text-emerald-400" />
-                    <span className="font-semibold text-slate-100">
-                      {selectedStage.scriptFilename}
-                    </span>
+                    <span className="font-semibold text-slate-100">{activeScriptFilename}</span>
                     <span className="text-slate-500">·</span>
                     <span className="text-emerald-400">
-                      Dynamically Injected with [{artifactConfig.projectName}]
+                      Injected with [{artifactConfig.projectName}]
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* v2.5 Shell Mode Toggle: Windows 11 PowerShell (.ps1) vs Bash/Python */}
+                    <div className="flex items-center gap-1 bg-[#090D16] border border-slate-800 p-1 rounded-xl">
+                      <button
+                        type="button"
+                        data-testid="shell-mode-powershell"
+                        onClick={() => setShellMode('powershell')}
+                        className={`px-2.5 py-1 text-xs font-mono font-semibold rounded-lg transition-colors cursor-pointer ${
+                          shellMode === 'powershell'
+                            ? 'bg-indigo-500 text-slate-950'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        Win11 PowerShell (.ps1)
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="shell-mode-bash"
+                        onClick={() => setShellMode('bash')}
+                        className={`px-2.5 py-1 text-xs font-mono font-semibold rounded-lg transition-colors cursor-pointer ${
+                          shellMode === 'bash'
+                            ? 'bg-emerald-400 text-slate-950'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        Bash / Python ({selectedStage.scriptLanguage === 'python' ? '.py' : '.sh'})
+                      </button>
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => handleCopyText(selectedStage.id, renderedScript)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                         copiedId === selectedStage.id
                           ? 'bg-emerald-400 text-slate-950'
                           : 'bg-[#090D16] hover:bg-slate-800 text-slate-100 border border-slate-700'
@@ -510,17 +557,15 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                       ) : (
                         <>
                           <Copy className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Copy {selectedStage.scriptFilename}</span>
+                          <span>Copy {activeScriptFilename}</span>
                         </>
                       )}
                     </button>
 
                     <button
                       type="button"
-                      onClick={() =>
-                        handleDownloadFile(selectedStage.scriptFilename, renderedScript)
-                      }
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                      onClick={() => handleDownloadFile(activeScriptFilename, renderedScript)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-xl transition-colors cursor-pointer whitespace-nowrap shrink-0"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>Download</span>
@@ -530,7 +575,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
 
                 <pre
                   data-testid="automation-stage-script"
-                  className="bg-[#090D16] border border-slate-800 rounded-lg p-4 text-xs font-mono text-slate-200 whitespace-pre-wrap leading-relaxed overflow-x-auto max-h-96 overflow-y-auto"
+                  className="bg-[#090D16] border border-slate-800 rounded-2xl p-4 text-xs font-mono text-slate-200 whitespace-pre-wrap leading-relaxed overflow-x-auto max-h-96 overflow-y-auto"
                 >
                   {renderedScript}
                 </pre>
@@ -542,7 +587,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                   <button
                     type="button"
                     onClick={() => onSelectStageId(prevStage.id)}
-                    className="px-3 py-1.5 text-xs font-medium text-slate-300 bg-[#090D16] hover:bg-slate-800 border border-slate-800 rounded-md transition-colors cursor-pointer"
+                    className="px-3.5 py-2 text-xs font-medium text-slate-300 bg-[#090D16] hover:bg-slate-800 border border-slate-800 rounded-xl transition-colors cursor-pointer"
                   >
                     ← Stage {prevStage.number}: {prevStage.title}
                   </button>
@@ -554,7 +599,7 @@ export const AutomationSubwebsite: React.FC<AutomationSubwebsiteProps> = ({
                   <button
                     type="button"
                     onClick={() => onSelectStageId(nextStage.id)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded-md transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded-xl transition-colors cursor-pointer"
                   >
                     <span>
                       Next: Stage {nextStage.number} ({nextStage.scriptFilename})

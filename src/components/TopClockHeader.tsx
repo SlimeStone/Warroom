@@ -82,7 +82,7 @@ export const TopClockHeader: React.FC<TopClockHeaderProps> = ({
             <button
               type="button"
               onClick={onBackToHome}
-              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-300 bg-[#090D16] hover:bg-slate-800 border border-slate-800 rounded transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-[#090D16] hover:bg-slate-800 border border-slate-800 rounded-xl transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5 text-cyan-400" />
               <span>Home Portal</span>
@@ -90,7 +90,7 @@ export const TopClockHeader: React.FC<TopClockHeaderProps> = ({
           )}
           <span className="text-xs sm:text-sm font-bold tracking-tight text-slate-100 whitespace-nowrap font-display">
             <span className="text-cyan-400 font-mono mr-1.5">SUB-WEBSITE 01</span>
-            WAR ROOM v2.0
+            WAR ROOM v2.5
           </span>
         </div>
 
@@ -149,15 +149,15 @@ export const TopClockHeader: React.FC<TopClockHeaderProps> = ({
             <button
               type="button"
               onClick={onGoToAutomationPlan}
-              className="hidden sm:inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-emerald-300 bg-[#090D16] hover:bg-slate-800 border border-emerald-500/40 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="hidden sm:inline-flex items-center px-3 py-1.5 text-xs font-medium text-emerald-300 bg-[#090D16] hover:bg-slate-800 border border-emerald-500/40 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
-              Sub-Website 2: Automation Plan →
+              Sub-Website 2: Autopilot v2.5 →
             </button>
           )}
           <button
             type="button"
             onClick={onExportBlueprint}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export CONTEXT.md</span>

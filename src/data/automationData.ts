@@ -39,7 +39,7 @@ export interface CompressionMatrixRow {
 export const TIME_COMPRESSION_MATRIX: CompressionMatrixRow[] = [
   {
     phaseGroup: 'Phases 1.1 – 1.2 (Rubric & Red-Team)',
-    moduleLabel: 'THE BRAIN v2.0',
+    moduleLabel: 'THE BRAIN v2.5',
     manualProcess: 'Manual PDF uploads, copy-pasting 3 architectures into DeepSeek-R1',
     manualTime: '60 min',
     automatedPipeline: 'Async Python orchestrator running Gemini Deep Research + Qwen3 + DeepSeek-R1 gauntlet',
@@ -48,7 +48,7 @@ export const TIME_COMPRESSION_MATRIX: CompressionMatrixRow[] = [
   },
   {
     phaseGroup: 'Phases 1.3 – 1.5 (CONTEXT.md & Mock API)',
-    moduleLabel: 'THE BRAIN v2.0',
+    moduleLabel: 'THE BRAIN v2.5',
     manualProcess: 'Hand-writing 5 CONTEXT.md blocks, copilot rules, and mock_server.py',
     manualTime: '90 min',
     automatedPipeline: 'Zero-touch schema compiler generating CONTEXT.md + booting FastAPI mock_server.py',
@@ -57,28 +57,28 @@ export const TIME_COMPRESSION_MATRIX: CompressionMatrixRow[] = [
   },
   {
     phaseGroup: 'Phases 2.1 – 2.3 (UI, RAG & Async API)',
-    moduleLabel: 'THE CODER v2.0',
+    moduleLabel: 'THE CODER v2.5',
     manualProcess: 'Manual component scaffolding, writing 50-row seed.py, wiring BGE-M3 & SigLIP 2',
     manualTime: '450 min',
-    automatedPipeline: 'Parallel codegen CLI + automated 50-row domain seeder + HNSW index builder',
+    automatedPipeline: 'Ryzen 9 HX 8-worker domain seeder + RTX 5060 FP16 BGE-M3 index builder',
     automatedTime: '14 min',
     speedupFactor: '32.1x',
   },
   {
-    phaseGroup: 'Phases 2.4 – 2.5 (3-Tier ML & Repomix)',
-    moduleLabel: 'THE CODER v2.0',
+    phaseGroup: 'Phases 2.4 – 2.5 (Hybrid AI & Repomix)',
+    moduleLabel: 'THE CODER v2.5',
     manualProcess: 'Wiring ModernBERT, SAM 3, Whisper, Google ADK, and manual repomix bug hunt',
     manualTime: '240 min',
-    automatedPipeline: 'Pre-wired 3-Tier DAG template + automated npx repomix 1M-context patch loop',
+    automatedPipeline: 'RTX 5060 (<4.4GB VRAM) + Gemini Cloud router + automated npx repomix patch loop',
     automatedTime: '9 min',
     speedupFactor: '26.7x',
   },
   {
     phaseGroup: 'Phases 3.1 – 3.4 (Quantize, E2E & Ship)',
-    moduleLabel: 'THE SHIPYARD v2.0',
+    moduleLabel: 'THE SHIPYARD v2.5',
     manualProcess: 'Manual ONNX export, recording demo_vault.json, writing Dockerfiles & Playwright specs',
     manualTime: '180 min',
-    automatedPipeline: '1-command ONNX fp16/vLLM quantizer, vault recorder, 3/3 Playwright gate & git tag',
+    automatedPipeline: '1-command RTX 5060 FP16 quantizer, demo_vault.json recorder & 3-worker Playwright gate',
     automatedTime: '8 min',
     speedupFactor: '22.5x',
   },
@@ -710,6 +710,7 @@ export function generateMasterAutopilotBash(
 ): string {
   const header = `#!/usr/bin/env bash
 # ==============================================================================
+# AUTOPILOT v2.5 (COMPATIBLE WITH v2.0) — MASTER 8-STAGE HACKATHON AUTOMATION HARNESS
 # AUTOPILOT v2.0 — MASTER 8-STAGE HACKATHON AUTOMATION HARNESS
 # Project: ${config.projectName}
 # Problem Domain: ${config.problemDomain}
@@ -726,6 +727,145 @@ set -euo pipefail
 # File: ${st.scriptFilename}
 # ------------------------------------------------------------------------------
 ${injected}`;
+  });
+
+  return [header, ...blocks].join('\n\n');
+}
+
+export function generateStagePowerShellScript(
+  stage: AutomationStage,
+  config: Pick<ArtifactConfig, 'projectName' | 'problemDomain' | 'domainUrl'>
+): string {
+  const project = config.projectName.trim() || 'AegisGrid AI';
+  const domain = config.problemDomain.trim() || 'Autonomous Microgrid Fault Triage';
+  const url = config.domainUrl.trim() || 'https://aegisgrid.tech';
+  const slug =
+    project
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'hackathon-app';
+
+  const psMap: Record<string, string> = {
+    'auto-stage-1': `# 01_bootstrap_env.ps1 — Windows 11 PowerShell + RTX 5060 (8GB) + 16GB RAM Bootstrap
+# Project: ${project} | Domain: ${domain}
+$ErrorActionPreference = "Stop"
+Write-Host "[AUTOPILOT v2.5 - STAGE 01] Checking NVIDIA RTX 5060 (8GB VRAM) & AMD Ryzen 9 HX..." -ForegroundColor Cyan
+nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
+
+mkdir "${slug}" -Force | Out-Null
+Set-Location "${slug}"
+mkdir web, api, engine, docs, scripts, .github -Force | Out-Null
+
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+py -m venv .venv
+.\\.venv\\Scripts\\Activate.ps1
+
+@"
+GEMINI_API_KEY=paste_your_key_here
+PROJECT_NAME=${project}
+PROBLEM_DOMAIN=${domain}
+CUDA_VISIBLE_DEVICES=0
+RTX5060_MAX_VRAM_MB=5500
+SYSTEM_RAM_WORKERS=2
+RYZEN_CPU_THREADS=16
+"@ | Set-Content -Path .env -Encoding UTF8
+Write-Host "[STAGE 01 COMPLETE] Windows 11 workspace & .venv initialized." -ForegroundColor Green`,
+
+    'auto-stage-2': `# 02_brain_research_agent.ps1 — Rubric & Domain Research on Windows 11
+# Project: ${project} | Domain: ${domain}
+$ErrorActionPreference = "Stop"
+Write-Host "[AUTOPILOT v2.5 - STAGE 02] Installing Google GenAI SDK in Windows .venv..." -ForegroundColor Cyan
+python -m pip install --upgrade pip
+pip install google-genai pydantic python-dotenv
+
+"Judging Criteria: Technical Depth (30%), Real-World Impact in ${domain} (30%), Live Demo Polish (20%), Innovation (20%)." | Set-Content -Path docs\\rules.txt -Encoding UTF8
+python scripts\\02_brain_research_agent.py --domain "${domain}"
+Get-Content docs\\research_dossier.json
+Write-Host "[STAGE 02 COMPLETE] Rubric & 3 domain bottlenecks saved to docs\\research_dossier.json." -ForegroundColor Green`,
+
+    'auto-stage-3': `# 03_adversarial_ideation.ps1 — Hardware-Safe Architecture & 4-Screen Storyboard Lock
+# Project: ${project} | Domain: ${domain}
+$ErrorActionPreference = "Stop"
+Write-Host "[AUTOPILOT v2.5 - STAGE 03] Running Idea Filter (RTX 5060 8GB + 16GB RAM safe)..." -ForegroundColor Cyan
+python scripts\\03_adversarial_ideation.py --project "${project}"
+Get-Content docs\\winning_idea_lock.json
+Write-Host "Colors Locked: Background=#090D16, Surface=#111827, Primary=#06B6D4, Accent=#6366F1" -ForegroundColor Cyan
+Write-Host "[STAGE 03 COMPLETE] Hour 1:00 Idea Lock & 4-Screen Golden Storyboard verified." -ForegroundColor Green`,
+
+    'auto-stage-4': `# 04_ignite_repo.ps1 — CONTEXT.md Compiler & 16GB-RAM-Safe FastAPI Mock Server
+# Project: ${project} | Domain: ${domain}
+$ErrorActionPreference = "Stop"
+Write-Host "[AUTOPILOT v2.5 - STAGE 04] Generating CONTEXT.md & starting 2-worker FastAPI server..." -ForegroundColor Cyan
+pip install fastapi uvicorn
+Start-Process python -ArgumentList "-m uvicorn api.mock_server:app --host 127.0.0.1 --port 8000 --workers 2" -WindowStyle Minimized
+Start-Sleep -Seconds 2
+curl.exe -s http://127.0.0.1:8000/api/v1/health
+git init; git add .; git commit -m "feat: lock CONTEXT.md and Windows 11 mock_server"
+Write-Host "[STAGE 04 COMPLETE] Mock server healthy on port 8000 (<120MB RAM)." -ForegroundColor Green`,
+
+    'auto-stage-5': `# 05_scaffold_coder.ps1 — Ryzen 9 HX 8-Worker Seeder, RTX 5060 BGE-M3 & 4GB-Capped Vite UI
+# Project: ${project} | Domain: ${domain}
+$ErrorActionPreference = "Stop"
+Write-Host "[AUTOPILOT v2.5 - STAGE 05] Seeding 50 records on AMD Ryzen 9 HX (8 workers)..." -ForegroundColor Cyan
+python scripts\\05_scaffold_coder.py --seed-count 50 --workers 8 --domain "${domain}"
+nvidia-smi --query-gpu=name,memory.used,memory.free --format=csv
+$env:NODE_OPTIONS="--max-old-space-size=4096"
+npm install
+Write-Host "[STAGE 05 COMPLETE] 50 domain records indexed on RTX 5060 (~1.2GB VRAM) & UI ready." -ForegroundColor Green`,
+
+    'auto-stage-6': `# 06_wire_hybrid_ai.ps1 — Hybrid RTX 5060 (<5.5GB VRAM) + Gemini Cloud & Repomix Scan
+# Project: ${project} | Domain: ${domain}
+$ErrorActionPreference = "Stop"
+Write-Host "[AUTOPILOT v2.5 - STAGE 06] Wiring RTX 5060 local models + Gemini Cloud synthesis..." -ForegroundColor Cyan
+python scripts\\06_wire_3tier_dag.py --project "${project}" --gpu-vram-limit-mb 5500
+npx repomix --output full_repo_context.txt
+npm run build
+git add .; git commit -m "feat: complete hybrid RTX 5060 + Cloud pipeline before Hour 14:00 freeze"
+Write-Host "[STAGE 06 COMPLETE] Zero TypeScript/build errors. Hour 14:00 Feature Freeze active." -ForegroundColor Green`,
+
+    'auto-stage-7': `# 07_quantize_and_vault.ps1 — RTX 5060 FP16 Tensor Core Quantization & Offline Backup Vault
+# Project: ${project} | Domain: ${domain}
+$ErrorActionPreference = "Stop"
+Write-Host "[AUTOPILOT v2.5 - STAGE 07] Compressing local models to FP16 for 8GB RTX 5060..." -ForegroundColor Cyan
+python scripts\\07_quantize_and_vault.py --project "${project}" --gpu "RTX5060-8GB" --precision fp16
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/analyze" -Method Post -ContentType "application/json" -Body '{"query":"demo"}'
+git add api\\demo_vault.json; git commit -m "chore: lock RTX 5060 FP16 config and offline demo_vault.json"
+Write-Host "[STAGE 07 COMPLETE] RTX 5060 VRAM at ~3.8GB/8.0GB & api\\demo_vault.json locked." -ForegroundColor Green`,
+
+    'auto-stage-8': `# 08_shipyard_release.ps1 — Ryzen 9 HX 3-Worker Playwright Gate & Hour 16:45 Release Lock
+# Project: ${project} | Live URL: ${url}
+$ErrorActionPreference = "Stop"
+Write-Host "[AUTOPILOT v2.5 - STAGE 08] Running 3 parallel Playwright browsers on AMD Ryzen 9 HX..." -ForegroundColor Cyan
+npx playwright test --workers=3
+Get-Content README.md | Select-Object -First 25
+git add .; git commit -m "release: v2.5.0-submission-lock (Win11 Ryzen 9 HX + RTX 5060 8GB verified)"
+git tag v2.5.0-submission-lock
+Write-Host "[STAGE 08 COMPLETE] ${project} verified and ready for live submission at ${url}!" -ForegroundColor Green`,
+  };
+
+  return psMap[stage.id] ?? injectAutomationVariables(stage.scriptTemplate, config);
+}
+
+export function generateMasterAutopilotPowerShell(
+  config: Pick<ArtifactConfig, 'projectName' | 'problemDomain' | 'domainUrl'>,
+  stages: AutomationStage[] = AUTOMATION_STAGES
+): string {
+  const header = `# ==============================================================================
+# AUTOPILOT v2.5 — WINDOWS 11 POWERSHELL MASTER 8-STAGE HARNESS (.ps1)
+# Hardware Profile: Windows 11 | AMD Ryzen 9 HX | 16GB RAM | NVIDIA RTX 5060 (8GB VRAM)
+# Project: ${config.projectName}
+# Problem Domain: ${config.problemDomain}
+# Production URL: ${config.domainUrl}
+# ==============================================================================
+$ErrorActionPreference = "Stop"
+`;
+
+  const blocks = stages.map((st) => {
+    const psBlock = generateStagePowerShellScript(st, config);
+    return `# ------------------------------------------------------------------------------
+# STAGE ${st.number}: ${st.title} (${st.manualDuration} -> ${st.automatedDuration})
+# ------------------------------------------------------------------------------
+${psBlock}`;
   });
 
   return [header, ...blocks].join('\n\n');

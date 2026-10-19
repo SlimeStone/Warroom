@@ -101,6 +101,59 @@ export interface ArtifactConfig {
   tier3Model: string;
 }
 
+export interface DomainPresetV25 {
+  id: string;
+  label: string;
+  badge: string;
+  projectName: string;
+  tagline: string;
+  problemDomain: string;
+  domainUrl: string;
+}
+
+export const DOMAIN_PRESETS_V2_5: DomainPresetV25[] = [
+  {
+    id: 'preset-grid',
+    label: 'Energy & Microgrid',
+    badge: 'DEFAULT v2.5',
+    projectName: 'AegisGrid AI',
+    tagline:
+      'Autonomous Sub-Second Microgrid Fault Triage & Transformer Thermal Cascade Prevention',
+    problemDomain: 'Autonomous Microgrid & Substation Fault Triage',
+    domainUrl: 'https://aegisgrid.tech',
+  },
+  {
+    id: 'preset-med',
+    label: 'Clinical ER Triage',
+    badge: 'HEALTHCARE',
+    projectName: 'PulseMed Nexus',
+    tagline:
+      'Multimodal Emergency Department Sepsis Early-Warning & Bed Routing Co-Pilot',
+    problemDomain: 'Real-Time ER Clinical Sepsis & Multimodal Triage',
+    domainUrl: 'https://pulsemed.tech',
+  },
+  {
+    id: 'preset-fintech',
+    label: 'FinTech Fraud Shield',
+    badge: 'FINTECH',
+    projectName: 'VeritasLedger AI',
+    tagline:
+      'Sub-12ms Cross-Border Wire Anomaly Detection & Synthetic Identity Ring Graph Analyzer',
+    problemDomain: 'Autonomous Real-Time Payment Fraud & AML Ring Detection',
+    domainUrl: 'https://veritasledger.tech',
+  },
+  {
+    id: 'preset-supply',
+    label: 'Port & Supply Chain',
+    badge: 'LOGISTICS',
+    projectName: 'PortPulse OS',
+    tagline:
+      'Satellite & AIS Maritime Chokepoint Rerouting with Automated Cold-Chain Rebooking',
+    problemDomain: 'Autonomous Maritime Port Disruption & Cold-Chain Rerouting',
+    domainUrl: 'https://portpulse.tech',
+  },
+];
+
 export const MODULE_METADATA: Record<
   ModuleId,
   {
@@ -117,8 +170,8 @@ export const MODULE_METADATA: Record<
   brain: {
     id: 'brain',
     number: 1,
-    title: 'SECTION 1: THE BRAIN v2.0',
-    shortTitle: 'The Brain v2.0',
+    title: 'SECTION 1: THE BRAIN v2.5',
+    shortTitle: 'The Brain v2.5',
     hoursLabel: 'Hours 0:00 – 2:30',
     startMinute: 0,
     endMinute: 150,
@@ -128,24 +181,24 @@ export const MODULE_METADATA: Record<
   coder: {
     id: 'coder',
     number: 2,
-    title: 'SECTION 2: THE CODER v2.0',
-    shortTitle: 'The Coder v2.0',
+    title: 'SECTION 2: THE CODER v2.5',
+    shortTitle: 'The Coder v2.5',
     hoursLabel: 'Hours 2:30 – 14:00',
     startMinute: 150,
     endMinute: 840,
     subtitle:
-      'Multi-model routing (Builder Models vs. Product Models), shader-grade UI, hybrid vector RAG, terminal automation, and 3-Tier Open-Source + Gemini ML pipeline.',
+      'Multi-model routing (Builder Models vs. Product Models), shader-grade UI, hybrid vector RAG, terminal automation, and RTX 5060 Local + Gemini Cloud ML pipeline.',
   },
   shipyard: {
     id: 'shipyard',
     number: 3,
-    title: 'SECTION 3: THE SHIPYARD v2.0',
-    shortTitle: 'The Shipyard v2.0',
+    title: 'SECTION 3: THE SHIPYARD v2.5',
+    shortTitle: 'The Shipyard v2.5',
     hoursLabel: 'Hours 14:00 – 17:00',
     startMinute: 840,
     endMinute: 1020,
     subtitle:
-      'Hard feature freeze at Hour 14:00, Dockerized bug hunt, ONNX/vLLM quantization, 5500ms Stage Circuit-Breaker (demo_vault.json), Student Pack deploy, and 16:45 submission lock.',
+      'Hard feature freeze at Hour 14:00, Dockerized bug hunt, ONNX/FP16 RTX 5060 quantization, offline demo_vault.json safety net, Student Pack deploy, and 16:45 submission lock.',
   },
 };
 

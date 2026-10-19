@@ -29,9 +29,12 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
             e.preventDefault();
             onSelectSite('home');
           }}
-          className="text-base sm:text-lg font-bold tracking-tight text-slate-100 whitespace-nowrap shrink-0 font-display hover:text-cyan-400 transition-colors"
+          className="inline-flex items-center gap-2 text-base sm:text-lg font-bold tracking-tight text-slate-100 whitespace-nowrap shrink-0 font-display hover:text-cyan-400 transition-colors"
         >
-          WAR ROOM NEXUS
+          <span>WAR ROOM NEXUS</span>
+          <span className="px-2 py-0.5 text-[11px] font-mono font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/40 rounded-lg">
+            v2.5
+          </span>
         </a>
 
         {/* Zone 2: 4 concise single-line text navigation links */}
