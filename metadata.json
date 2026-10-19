@@ -1,0 +1,6 @@
+{
+  "name": "WAR ROOM v2.0 — 17-Hour Hackathon Execution OS",
+  "description": "Interactive 17-hour hackathon command center covering The Brain, The Coder, and The Shipyard modules with live phase sync, model routing matrix, dynamic prompt vault, and artifact generators.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
